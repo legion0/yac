@@ -1,0 +1,9 @@
+{
+	"name": "echo",
+	"type": "task",
+	"include": "sample_parent.json:sample_merge_policy.json",
+	"args": {
+		"positional": ["XXX", "YYY"]
+	},
+	"merge_policy": "echo"
+}

@@ -1,0 +1,9 @@
+{
+	"name": "echo",
+	"type": "task",
+	"target": "echo",
+	"args": {
+		"positional": ["Hello", "YAC"]
+	},
+	"something": "nasty"
+}
