@@ -2,7 +2,18 @@
 "mipmip.task.echo": {
 	"target": "echo",
 	"args": {
-		"positional": ["Hello", "YAC"]
+		"positional": ["Hello", "Mip Mip !"]
+	}
+},
+"mipmip.task.cat_sample_file": {
+	"target": "cat",
+	"args": {
+		"positional": ["sample_text_file"]
+	},
+	"artifacts": {
+		"stdout": {
+			"type": "stdout"
+		}
 	}
 }
 }

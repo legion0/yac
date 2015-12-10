@@ -29,7 +29,7 @@ def main():
 	roots = roots.split(':')
 	config = pyramid_lib.load_configs(roots)
 	
-	pprint(config)
+#	pprint(config)
 
 	if args.command == 'run':
 		workflow = config.get('mipmip.workflow.' + args.target, None)
@@ -37,23 +37,36 @@ def main():
 			return run_workflow(workflow, config)
 		task = config.get('mipmip.task.' + args.target, None)
 		if task is not None:
-			return run_task(task)
+			return run_task(args.target, task, config)
 
 def run_workflow(workflow, config):
 	for task_name in workflow.get('tasks', []):
 		task = config.get('mipmip.task.' + task_name, None)
-		returncode = run_task(task)
+		returncode = run_task(task_name, task, config)
 		if returncode != 0:
 			return returncode
 	return 0
 
-def run_task(task):
+def run_task(task_name, task, config):
 	if task is None:
 		return
 	target = task['target']
 	positional_args = task.get('args', {}).get('positional', [])
-	returncode = subprocess.call([target] + positional_args)
-	return returncode
+	for i in xrange(len(positional_args)):
+		arg = positional_args[i]
+		if arg.startswith('mipmip.artifacts.'):
+			positional_args[i] = config.get(arg, '')
+	stdout_pipe = None
+	for artifact_name, artifact in task.get('artifacts', {}).viewitems():
+		if artifact['type'] == 'stdout':
+			stdout_pipe = subprocess.PIPE
+	p = subprocess.Popen([target] + positional_args, stdout=stdout_pipe)
+	returncode = p.wait()
+	if returncode == 0:
+		for artifact_name, artifact in task.get('artifacts', {}).viewitems():
+			if artifact['type'] == 'stdout':
+				config['mipmip.artifacts.' + task_name + '.' + artifact_name] = p.stdout.read()
+	return p.returncode
 
 if __name__ == "__main__":
 	main()

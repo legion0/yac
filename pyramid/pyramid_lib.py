@@ -51,17 +51,17 @@ def merge_configs(parent_config, child_config, policy=None):
 
 class DefaultMerger(object):
 	def merge(self, parent_config, child_config):
-		print 'parent_config', parent_config
-		print 'child_config', child_config
+#		print 'parent_config', parent_config
+#		print 'child_config', child_config
 		new_config = None
 		if type(child_config) != type(parent_config):
-			print '!='
+#			print '!='
 			new_config = deepcopy(child_config)
 		elif type(child_config) is dict:
-			print 'dict'
+#			print 'dict'
 			new_config = deepcopy(parent_config)
 			for key in set(parent_config.viewkeys()) | set(child_config.viewkeys()):
-				print 'key=', key
+#				print 'key=', key
 				if key not in parent_config:
 					new_config[key] = deepcopy(child_config[key])
 				elif key not in child_config:
@@ -69,9 +69,9 @@ class DefaultMerger(object):
 				else:
 					new_config[key] = self.merge(parent_config[key], child_config[key])
 		else:
-			print 'else'
+#			print 'else'
 			new_config = deepcopy(child_config)
-		print 'new_config', new_config
+#		print 'new_config', new_config
 		return new_config
 
 class PolicyMerger(object):
@@ -81,12 +81,12 @@ class PolicyMerger(object):
 		return self._merge_inner(parent_config, child_config, self._policy)
 
 	def _merge_inner(self, parent_config, child_config, policy):
-		print 'parent_config', parent_config
-		print 'child_config', child_config
-		print 'policy', policy
+#		print 'parent_config', parent_config
+#		print 'child_config', child_config
+#		print 'policy', policy
 		type_ = type(child_config)
 		if type(child_config) != type(parent_config) or policy == 'overwrite':
-			print 'type != or overwrite'
+#			print 'type != or overwrite'
 			new_config = deepcopy(child_config)
 		elif policy == 'append':
 			new_config = parent_config + child_config
@@ -97,10 +97,10 @@ class PolicyMerger(object):
 #			for i in xrange(len(child_config)):
 #				new_config.append(self._merge_inner(parent_config[i], child_config[i], None))
 		elif type_ is dict:
-			print 'dict'
+#			print 'dict'
 			new_config = deepcopy(parent_config)
 			for key in set(parent_config.viewkeys()) | set(child_config.viewkeys()):
-				print 'key=', key
+#				print 'key=', key
 				if key not in parent_config:
 					new_config[key] = deepcopy(child_config[key])
 				elif key not in child_config:
@@ -112,9 +112,9 @@ class PolicyMerger(object):
 						next_policy = None
 					new_config[key] = self._merge_inner(parent_config[key], child_config[key], next_policy)
 		else:
-			print 'else'
+#			print 'else'
 			new_config = deepcopy(child_config)
-		print 'new_config', new_config
+#		print 'new_config', new_config
 		return new_config
 
 if __name__ == "__main__":

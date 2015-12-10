@@ -1,12 +1,12 @@
 {
 "mipmip.task.echo": {
 	"args": {
-		"positional": ["XXX", "YYY"]
+		"positional": ["I Can", "mipmip.artifacts.cat_sample_file.stdout"]
 	}
 },
 "mipmip.workflow.echo2": {
 	"tasks": [
-		"echo",
+		"cat_sample_file",
 		"echo"
 	]
 },
