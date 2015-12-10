@@ -1,0 +1,9 @@
+{
+"mipmip.task.echo": {
+	"target": "echo",
+	"args": {
+		"positional": ["Hello", "YAC"]
+	}
+}
+}
+

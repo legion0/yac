@@ -1,9 +1,15 @@
 {
 	"name": "echo",
 	"type": "task",
-	"include": "sample_parent.json:sample_merge_policy.json",
+	"pyramid.include": [
+		"sample_parent.json"
+	],
 	"args": {
 		"positional": ["XXX", "YYY"]
 	},
-	"merge_policy": "echo"
+	"pyramid.merge_policy": {
+		"args": {
+			"positional": "append"
+		}
+	}
 }

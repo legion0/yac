@@ -1,0 +1,24 @@
+{
+"mipmip.task.echo": {
+	"args": {
+		"positional": ["XXX", "YYY"]
+	}
+},
+"mipmip.workflow.echo2": {
+	"tasks": [
+		"echo",
+		"echo"
+	]
+},
+"pyramid.include": [
+	"mipmip_parent.json"
+],
+"pyramid.merge_policy": {
+	"mipmip.task.echo": {
+		"args": {
+			"positional": "append"
+		}
+	}
+}
+}
+
