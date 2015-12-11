@@ -51,8 +51,8 @@ def run_task(task_name, task, config):
 	if task is None:
 		return
 	target = task['target']
-	positional_args = parse_list_arg(task.get('args', {}).get('positional', []), config, None)
-	joined_named_args = parse_dict_arg(task.get('args', {}).get('named', {}), config, None)
+	positional_args = parse_list_arg(task.get('args', {}).get('positional', []), config, config.get('mipmip.arg_policy.' + task_name, {}).get('positional', {}), False)
+	joined_named_args = parse_dict_arg(task.get('args', {}).get('named', {}), config, config.get('mipmip.arg_policy.' + task_name, {}).get('named', {}), False)
 	stdout_pipe = None
 	for artifact_name, artifact in task.get('artifacts', {}).viewitems():
 		if artifact['type'] == 'stdout':
@@ -66,42 +66,59 @@ def run_task(task_name, task, config):
 				config['mipmip.artifacts.' + task_name + '.' + artifact_name] = p.stdout.read()
 	return p.returncode
 
-def parse_dict_arg(arg, config, glue=' ', inner_glue='=', wrap=''):
-	if 'mipmip.glue' in arg:
-		glue = arg['mipmip.glue']
-	if 'mipmip.inner_glue' in arg:
-		inner_glue = arg['mipmip.inner_glue']
-	if 'mipmip.wrap' in arg:
-		wrap = arg['mipmip.wrap']
-	if 'mipmip.values' in arg:
-		return parse_list_arg(arg['mipmip.values'], config, glue)
+def parse_dict_arg(arg, config, policy, use_glue=True):
+	try:
+		inner_glue = policy['inner_glue']
+	except (TypeError, KeyError):
+		inner_glue = '='
+	try:
+		wrap = policy['wrap']
+	except (TypeError, KeyError):
+		wrap = ''
+	try:
+		glue = policy['glue']
+	except (TypeError, KeyError):
+		glue = ','
 	arg_list = []
 	for key, val in arg.viewitems():
-		if key == 'mipmip.glue':
-			continue
-		if key == 'mipmip.inner_glue':
-			continue
-		if key == 'mipmip.wrap':
-			continue
-		arg_list += [key + inner_glue + parse_inner_value(val, config)]
-	if glue is not None:
+		try:
+			inner_policy = policy[key]
+		except (TypeError, KeyError):
+			inner_policy = None
+		arg_list += [key + inner_glue + parse_inner_value(val, config, inner_policy)]
+	if use_glue:
 		return wrap + glue.join(arg_list) + wrap
 	return arg_list
 
-def parse_list_arg(values, config, glue=','):
+def parse_list_arg(values, config, policy, use_glue=True):
+	try:
+		wrap = policy['wrap']
+	except (TypeError, KeyError):
+		wrap = ''
+	try:
+		glue = policy['glue']
+	except (TypeError, KeyError):
+		glue = ','
 	for i in xrange(len(values)):
-		values[i] = parse_inner_value(values[i], config)
-	if glue is not None:
-		return glue.join(values)
+		try:
+			inner_policy = policy[i]
+		except (TypeError, KeyError):
+			try:
+				inner_policy = policy[unicode(i)]
+			except (TypeError, KeyError):
+				inner_policy = None
+		values[i] = parse_inner_value(values[i], config, inner_policy)
+	if use_glue:
+		return wrap + glue.join(values) + wrap
 	return values
 
-def parse_inner_value(arg, config):
+def parse_inner_value(arg, config, policy):
 	if type(arg) is unicode and arg.startswith('mipmip.artifacts.'):
 		return config.get(arg, '')
 	elif type(arg) is dict:
-		return parse_dict_arg(arg, config, ',')
+		return parse_dict_arg(arg, config, policy, ',')
 	elif type(arg) is list:
-		return parse_list_arg(arg, config)
+		return parse_list_arg(arg, config, policy)
 	return arg
 	
 
