@@ -1,7 +1,33 @@
 {
 "mipmip.task.echo": {
 	"args": {
-		"positional": ["I Can", "mipmip.artifacts.cat_sample_file.stdout"]
+		"positional": [
+			"mipmip.artifacts.cat_sample_file.stdout",
+			"apples", "oranges"
+		],
+		"named": {
+			"--grocery_list": ["apples", "oranges"],
+			"--grocery_list_2": {
+				"mipmip.glue": "|",
+				"mipmip.values": ["apples", "oranges"]
+			},
+			"--grocery_list_3": {
+				"apples": "1",
+				"oranges": "2",
+				"mipmip.inner_glue": ":",
+				"mipmip.glue": "/"
+			},
+			"--grocery_list_4": {
+				"apples": {
+					"green": "1",
+					"red": "2"
+				},
+				"oranges": "2",
+				"mipmip.inner_glue": ":",
+				"mipmip.glue": " ",
+				"mipmip.wrap": "\""
+			}
+		}
 	}
 },
 "mipmip.workflow.echo2": {

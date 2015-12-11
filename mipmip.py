@@ -51,22 +51,59 @@ def run_task(task_name, task, config):
 	if task is None:
 		return
 	target = task['target']
-	positional_args = task.get('args', {}).get('positional', [])
-	for i in xrange(len(positional_args)):
-		arg = positional_args[i]
-		if arg.startswith('mipmip.artifacts.'):
-			positional_args[i] = config.get(arg, '')
+	positional_args = parse_list_arg(task.get('args', {}).get('positional', []), config, None)
+	joined_named_args = parse_dict_arg(task.get('args', {}).get('named', {}), config, None)
 	stdout_pipe = None
 	for artifact_name, artifact in task.get('artifacts', {}).viewitems():
 		if artifact['type'] == 'stdout':
 			stdout_pipe = subprocess.PIPE
-	p = subprocess.Popen([target] + positional_args, stdout=stdout_pipe)
+	print repr([target] + positional_args + joined_named_args)
+	p = subprocess.Popen([target] + positional_args + joined_named_args, stdout=stdout_pipe)
 	returncode = p.wait()
 	if returncode == 0:
 		for artifact_name, artifact in task.get('artifacts', {}).viewitems():
 			if artifact['type'] == 'stdout':
 				config['mipmip.artifacts.' + task_name + '.' + artifact_name] = p.stdout.read()
 	return p.returncode
+
+def parse_dict_arg(arg, config, glue=' ', inner_glue='=', wrap=''):
+	if 'mipmip.glue' in arg:
+		glue = arg['mipmip.glue']
+	if 'mipmip.inner_glue' in arg:
+		inner_glue = arg['mipmip.inner_glue']
+	if 'mipmip.wrap' in arg:
+		wrap = arg['mipmip.wrap']
+	if 'mipmip.values' in arg:
+		return parse_list_arg(arg['mipmip.values'], config, glue)
+	arg_list = []
+	for key, val in arg.viewitems():
+		if key == 'mipmip.glue':
+			continue
+		if key == 'mipmip.inner_glue':
+			continue
+		if key == 'mipmip.wrap':
+			continue
+		arg_list += [key + inner_glue + parse_inner_value(val, config)]
+	if glue is not None:
+		return wrap + glue.join(arg_list) + wrap
+	return arg_list
+
+def parse_list_arg(values, config, glue=','):
+	for i in xrange(len(values)):
+		values[i] = parse_inner_value(values[i], config)
+	if glue is not None:
+		return glue.join(values)
+	return values
+
+def parse_inner_value(arg, config):
+	if type(arg) is unicode and arg.startswith('mipmip.artifacts.'):
+		return config.get(arg, '')
+	elif type(arg) is dict:
+		return parse_dict_arg(arg, config, ',')
+	elif type(arg) is list:
+		return parse_list_arg(arg, config)
+	return arg
+	
 
 if __name__ == "__main__":
 	main()
