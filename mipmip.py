@@ -57,8 +57,9 @@ def run_task(task_name, task, config):
 	for artifact_name, artifact in task.get('artifacts', {}).viewitems():
 		if artifact['type'] == 'stdout':
 			stdout_pipe = subprocess.PIPE
-	print repr([target] + positional_args + joined_named_args)
-	p = subprocess.Popen([target] + positional_args + joined_named_args, stdout=stdout_pipe)
+	args = [target] + positional_args + joined_named_args
+	print subprocess.list2cmdline(args)
+	p = subprocess.Popen(args, stdout=stdout_pipe)
 	returncode = p.wait()
 	if returncode == 0:
 		for artifact_name, artifact in task.get('artifacts', {}).viewitems():
@@ -123,5 +124,5 @@ def parse_inner_value(arg, config, policy):
 	
 
 if __name__ == "__main__":
-	main()
+	exit(main())
 
