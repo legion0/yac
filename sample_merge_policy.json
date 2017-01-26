@@ -1,9 +1,0 @@
-{
-	"name": "echo",
-	"type": "merge_policy",
-	"policy": {
-		"args": {
-			"positional": "append"
-		}
-	}
-}

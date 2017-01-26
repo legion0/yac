@@ -58,3 +58,7 @@ target/
 
 # Vim temp files
 .*.swp
+
+# Python Virtual Env
+/mipmip.env/
+
